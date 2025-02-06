@@ -16,6 +16,9 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  sendgrid:
+    api-key: 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
+    from: quyenbong02091999@gmail.com
 
 springdoc:
   api-docs:
