@@ -13,6 +13,7 @@ import com.ehub.model.AddressEntity;
 import com.ehub.model.UserEntity;
 import com.ehub.repository.AddressRepository;
 import com.ehub.repository.UserRepository;
+import com.ehub.service.EmailService;
 import com.ehub.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -37,6 +39,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Override
     public UserPageResponse findAll(String keyword, String sort, int page, int size) {
@@ -138,6 +141,13 @@ public class UserServiceImpl implements UserService {
             });
             addressRepository.saveAll(addresses);
             log.info("Saved addresses: {}", addresses);
+        }
+
+        // Send email verification
+        try {
+            emailService.sendVerificationEmail(req.getEmail(), req.getUsername());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         return userEntity.getId();
