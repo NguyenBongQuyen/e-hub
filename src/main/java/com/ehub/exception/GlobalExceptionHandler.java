@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -153,6 +154,36 @@ public class GlobalExceptionHandler {
         errorResponse.setPath(request.getDescription(false).replace("uri=", ""));
         errorResponse.setStatus(INTERNAL_SERVER_ERROR.value());
         errorResponse.setError(INTERNAL_SERVER_ERROR.getReasonPhrase());
+        errorResponse.setMessage(e.getMessage());
+
+        return errorResponse;
+    }
+
+    @ExceptionHandler({ForbiddenException.class, AccessDeniedException.class})
+    @ResponseStatus(FORBIDDEN)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "403", description = "Access Dined",
+                    content = {@Content(mediaType = APPLICATION_JSON_VALUE,
+                            examples = @ExampleObject(
+                                    name = "403 Response",
+                                    summary = "Handle exception when access forbidden",
+                                    value = """
+                                            {
+                                              "timestamp": "YYYY-MM-DDThh:mm:ss.sss+zz:zz",
+                                              "status": 403,
+                                              "path": "/api/v1/...",
+                                              "error": "Access Denied",
+                                              "message": "{data} not found"
+                                            }
+                                            """
+                            ))})
+    })
+    public ErrorResponse handleForbiddenException(ForbiddenException e, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setTimestamp(new Date());
+        errorResponse.setPath(request.getDescription(false).replace("uri=", ""));
+        errorResponse.setStatus(FORBIDDEN.value());
+        errorResponse.setError(FORBIDDEN.getReasonPhrase());
         errorResponse.setMessage(e.getMessage());
 
         return errorResponse;

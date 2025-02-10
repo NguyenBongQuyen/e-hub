@@ -33,3 +33,9 @@ openapi:
     server: http://localhost:${server.port}
     title: Backend API Document
     version: v1.0.0
+
+jwt:
+  expiry-minutes: 60
+  expiry-day: 14
+  access-key: 5D0OfvBKlCI7Pw3BjTo5nDUNi+cVPa7Z+zY9D4a4kBw=
+  refresh-key: aguw8DEXLFmVIDD1cstKJsQW1oCyrnGMju5Z37VinVk=
