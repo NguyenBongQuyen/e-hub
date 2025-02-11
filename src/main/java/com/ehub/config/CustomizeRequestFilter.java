@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,6 +32,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @Component
 @RequiredArgsConstructor
 @Slf4j(topic = "CUSTOMIZE-FILTER")
+@EnableMethodSecurity
 public class CustomizeRequestFilter extends OncePerRequestFilter {
     private final UserServiceDetail serviceDetail;
     private final JwtService jwtService;
@@ -52,7 +54,9 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
             } catch (AccessDeniedException e) {
                 log.info(e.getMessage());
                 response.setStatus(HttpServletResponse.SC_OK);
-                response.getWriter().write(errorResponse(e.getMessage()));
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write(errorResponse(request.getRequestURI(), e.getMessage()));
                 return;
             }
 
@@ -68,11 +72,12 @@ public class CustomizeRequestFilter extends OncePerRequestFilter {
         }
     }
 
-    private String errorResponse(String message) {
+    private String errorResponse(String url, String message) {
         try {
             ErrorResponse error = new ErrorResponse();
             error.setTimestamp(new Date());
             error.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            error.setPath(url);
             error.setError("Forbidden");
             error.setMessage(message);
             Gson gson = new GsonBuilder().setPrettyPrinting().create();

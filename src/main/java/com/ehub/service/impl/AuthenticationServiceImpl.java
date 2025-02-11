@@ -17,9 +17,11 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.ehub.common.TokenType.REFRESH_TOKEN;
 
@@ -34,11 +36,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public TokenResponse getAccessToken(SignInRequest request) {
         log.info("Get Access Token");
+        List<String> authorities = new ArrayList<>();
         try {
             // Thực hiện xác thực với username và password
             Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
             log.info("isAuthenticated = {}", authenticate.isAuthenticated());
             log.info("Authorities: {}", authenticate.getAuthorities().toString());
+            authorities.add(authenticate.getAuthorities().toString());
 
             // Nếu xác thực thành công, lưu thông tin vào SecurityContext
             SecurityContextHolder.getContext().setAuthentication(authenticate);
@@ -46,14 +50,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             log.error("errorMessage: {}", e.getMessage());
             throw new AccessDeniedException(e.getMessage());
         }
-        // Get user
-        var user = userRepository.findByUsername(request.getUsername());
-        if (user == null) {
-            throw new UsernameNotFoundException(request.getUsername());
-        }
 
-        String accessToken = jwtService.generateAccessToken(user.getId(), user.getUsername(), user.getAuthorities());
-        String refreshToken = jwtService.generateRefreshToken(user.getId(), user.getUsername(), user.getAuthorities());
+        String accessToken = jwtService.generateAccessToken(request.getUsername(), authorities);
+        String refreshToken = jwtService.generateRefreshToken(request.getUsername(), authorities);
 
         return TokenResponse.builder()
                 .accessToken(accessToken)
@@ -69,11 +68,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         try {
             // Verify token
-            String userName = jwtService.extractUsername(refreshToken, REFRESH_TOKEN);
+            String username = jwtService.extractUsername(refreshToken, REFRESH_TOKEN);
             // Check user is active or inactivated
-            UserEntity user = userRepository.findByUsername(userName);
+            UserEntity user = userRepository.findByUsername(username);
+
+            List<String> authorities = new ArrayList<>();
+            user.getAuthorities().forEach(authority -> authorities.add(authority.getAuthority()));
+
             // Generate new access token
-            String accessToken = jwtService.generateAccessToken(user.getId(), user.getUsername(), user.getAuthorities());
+            String accessToken = jwtService.generateAccessToken(user.getUsername(), authorities);
 
             return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
         } catch (Exception e) {

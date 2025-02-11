@@ -126,6 +126,7 @@ public class UserServiceImpl implements UserService {
         userEntity.setEmail(req.getEmail());
         userEntity.setPhone(req.getPhone());
         userEntity.setUsername(req.getUsername());
+        userEntity.setPassword(passwordEncoder.encode(req.getPassword()));
         userEntity.setType(req.getType());
         userEntity.setStatus(req.getStatus());
         userRepository.save(userEntity);
@@ -143,12 +144,12 @@ public class UserServiceImpl implements UserService {
             log.info("Saved addresses: {}", addresses);
         }
 
-        // Send email verification
-        try {
-            emailService.sendVerificationEmail(req.getEmail(), req.getUsername());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        // Send email verification: Fake data so no need to send verification email
+//        try {
+//            emailService.sendVerificationEmail(req.getEmail(), req.getUsername());
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
 
         return userEntity.getId();
     }

@@ -20,6 +20,7 @@ public class UserCreationRequest implements Serializable {
     private Gender gender;
     private Date birthday;
     private String username;
+    private String password;
     @Email(message = "Email invalid")
     private String email;
     private String phone;

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,8 @@ public class UserController {
 
     @Operation(summary = "Get User List", description = "API retrieve user from database")
     @GetMapping("/list")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Manager')")
+//    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public Map<String, Object> getList(@RequestParam(required = false) String keyword,
                                        @RequestParam(required = false) String sort,
                                        @RequestParam(defaultValue = "0") int page,
@@ -46,6 +49,7 @@ public class UserController {
 
     @Operation(summary = "Get User Detail", description = "API retrieve user detail by ID from database")
     @GetMapping("/{userId}")
+    @PreAuthorize("hasAnyAuthority('Admin', 'Manager', 'User')")
     public Map<String, Object> getUserDetail(@PathVariable @Min(value = 1, message = "ID must be equals or greater than {value}") Long userId) {
         log.info("Get user detail by ID: {}", userId);
 
@@ -61,6 +65,7 @@ public class UserController {
 
     @Operation(summary = "Create User", description = "API add new user to database")
     @PostMapping
+    @PreAuthorize("hasAuthority('Admin')")
     public ResponseEntity<Object> createUser(@RequestBody @Valid UserCreationRequest request) {
         log.info("Create User: {}", request);
 
@@ -74,6 +79,7 @@ public class UserController {
 
     @Operation(summary = "Update User", description = "API update user to database")
     @PutMapping
+    @PreAuthorize("hasAnyAuthority('Admin', 'Manager', 'User')")
     public Map<String, Object> updateUser(@RequestBody @Valid UserUpdateRequest request) {
         log.info("Updating user: {}", request);
         userService.update(request);
@@ -88,6 +94,7 @@ public class UserController {
 
     @Operation(summary = "Change Password", description = "API change password for user to database")
     @PatchMapping("/change-pwd")
+    @PreAuthorize("hasAuthority('User')")
     public Map<String, Object> changePassword(@RequestBody @Valid UserPasswordRequest request) {
         log.info("Changing password for user: {}", request);
         userService.changePassword(request);
@@ -102,6 +109,7 @@ public class UserController {
 
     @Operation(summary = "Delete User", description = "API activate user from database")
     @DeleteMapping("/{userId}")
+    @PreAuthorize("hasAuthority('Admin')")
     public Map<String, Object> deleteUser(@PathVariable @Min(value = 1, message = "ID must be equals or greater than {value}") Long userId) {
         log.info("Deleting user: {}", userId);
         userService.delete(userId);
