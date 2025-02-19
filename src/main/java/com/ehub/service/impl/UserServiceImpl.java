@@ -101,12 +101,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse findByUsername(String username) {
-        return null;
+        UserEntity userEntity = userRepository.findByUsername(username);
+        if (userEntity == null) {
+            throw new ResourceNotFoundException("User not found");
+        }
+
+        return UserResponse.builder()
+                .id(userEntity.getId())
+                .firstName(userEntity.getFirstName())
+                .lastName(userEntity.getLastName())
+                .gender(userEntity.getGender())
+                .birthday(userEntity.getBirthday())
+                .username(userEntity.getUsername())
+                .phone(userEntity.getPhone())
+                .email(userEntity.getEmail())
+                .build();
     }
 
     @Override
     public UserResponse findByEmail(String email) {
-        return null;
+        UserEntity userEntity = userRepository.findByEmail(email);
+        if (userEntity == null) {
+            throw new ResourceNotFoundException("User not found");
+        }
+
+        return UserResponse.builder()
+                .id(userEntity.getId())
+                .firstName(userEntity.getFirstName())
+                .lastName(userEntity.getLastName())
+                .gender(userEntity.getGender())
+                .birthday(userEntity.getBirthday())
+                .username(userEntity.getUsername())
+                .phone(userEntity.getPhone())
+                .email(userEntity.getEmail())
+                .build();
     }
 
     @Override
@@ -129,15 +157,16 @@ public class UserServiceImpl implements UserService {
         userEntity.setPassword(passwordEncoder.encode(req.getPassword()));
         userEntity.setType(req.getType());
         userEntity.setStatus(req.getStatus());
-        userRepository.save(userEntity);
+
+        UserEntity result = userRepository.save(userEntity);
         log.info("Saved userEntity: {}", userEntity);
 
-        if (userEntity.getId() != null) {
+        if (result.getId() != null) {
             log.info("User id: {}", userEntity.getId());
             List<AddressEntity> addresses = new ArrayList<>();
             req.getAddresses().forEach(addressRequest -> {
                 AddressEntity addressEntity = new AddressEntity();
-                this.setAddressValues(addressEntity, addressRequest, userEntity);
+                this.setAddressValues(addressEntity, addressRequest, result);
                 addresses.add(addressEntity);
             });
             addressRepository.saveAll(addresses);
@@ -145,13 +174,13 @@ public class UserServiceImpl implements UserService {
         }
 
         // Send email verification: Fake data so no need to send verification email
-//        try {
-//            emailService.sendVerificationEmail(req.getEmail(), req.getUsername());
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
+        try {
+            emailService.sendVerificationEmail(req.getEmail(), req.getUsername());
+        } catch (IOException e) {
+            throw new InvalidDataException("Send email failed");
+        }
 
-        return userEntity.getId();
+        return result.getId();
     }
 
     @Override

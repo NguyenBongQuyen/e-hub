@@ -17,7 +17,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   sendgrid:
-    api-key: ${SENDGRID_API_KEY}
+    api-key: ${SENDGRID_API_KEY:DUMMY-SENDGRID_API_KEY}
     from: quyenbong02091999@gmail.com
     verify-link: http://localhost:8083/emails/confirm-email
     template-id: d-57fc4e3337164f369d368dd35d8ab7b4
@@ -35,7 +35,7 @@ openapi:
     version: v1.0.0
 
 jwt:
-  expiry-minutes: 60
-  expiry-day: 14
-  access-key: 5D0OfvBKlCI7Pw3BjTo5nDUNi+cVPa7Z+zY9D4a4kBw=
-  refresh-key: aguw8DEXLFmVIDD1cstKJsQW1oCyrnGMju5Z37VinVk=
+  expiry-minutes: ${JWT_EXPIRY_MINUTES:60}
+  expiry-day: ${JWT_EXPIRY_DAY:14}
+  access-key: ${JWT_ACCESS_KEY:5D0OfvBKlCI7Pw3BjTo5nDUNi+cVPa7Z+zY9D4a4kBw=}
+  refresh-key: ${JWT_REFRESH_KEY:aguw8DEXLFmVIDD1cstKJsQW1oCyrnGMju5Z37VinVk=}

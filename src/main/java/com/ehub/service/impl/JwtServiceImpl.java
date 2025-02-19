@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static com.ehub.common.TokenType.ACCESS_TOKEN;
+import static com.ehub.common.TokenType.REFRESH_TOKEN;
 
 @Service
 @Slf4j(topic = "JWT-SERVICE")
@@ -82,7 +83,7 @@ public class JwtServiceImpl implements JwtService {
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * expiryDay))
-                .signWith(getKey(ACCESS_TOKEN), SignatureAlgorithm.HS256)
+                .signWith(getKey(REFRESH_TOKEN), SignatureAlgorithm.HS256)
                 .compact();
     }
 

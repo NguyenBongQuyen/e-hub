@@ -6,12 +6,14 @@ import com.ehub.common.UserType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 @Getter
+@Setter
 public class UserCreationRequest implements Serializable {
     @NotBlank(message = "firstName must be not blank")
     private String firstName;
