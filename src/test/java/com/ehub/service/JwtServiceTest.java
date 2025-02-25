@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
-class JwtServiceImplTest {
+class JwtServiceTest {
     @InjectMocks
     private JwtServiceImpl jwtService;
 
